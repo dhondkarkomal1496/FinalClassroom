@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewBag.Title = "ForgotPass";
+}
+
+@if (TempData["question"] == null)
+{
+    using (Html.BeginForm("ForgotPass", "Home", FormMethod.Post, new { onsubmit = "return Validate();" }))
+
+    {
+        @Html.AntiForgeryToken()
+
+        
+
+
+        <div class="form-horizontal">
+            <h1>Forgot Password </h1>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+            <div class="form-group">
+                @Html.Label("EmployeeId", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextBox("EmployeeId", "", new { htmlAttributes = new { id = "EmployeeId", @class = "form-control" } })
+                    <span id="employeeId_error" class="text-danger"></span>
+
+                    @* @Html.ValidationMessageFor(model => model.EmployeeNumber, "", new { @class = "text-danger" })*@
+                </div>
+
+                <div style="margin-top:30px; margin-left:180px;">
+                    <input type="submit" id="search" value="Search" style="margin-left:30px" />
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="jumbotron">
+        @using (Html.BeginForm("GetPassword", "Home", FormMethod.Post, new { onsubmit = "return ValidateAnswer();" }))
+        {
+            <div>
+                <h4><b> Question :</b> @TempData["question"] </h4>
+            </div>
+            <div>
+                <h4><b> Answer :</b> @Html.TextBox("Answer", "", new { id = "answer" }) </h4>
+                <span id="answer_error" class="text-danger"></span>
+            </div>
+            <div>
+                <h4 class="btn "> <input type="submit" value="Get Password" /> </h4>
+            </div>
+        }
+    </div>
+}
+

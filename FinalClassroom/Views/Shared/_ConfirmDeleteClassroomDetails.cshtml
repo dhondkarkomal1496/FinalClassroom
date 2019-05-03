@@ -1,0 +1,44 @@
+﻿@model IEnumerable<FinalClassroom.Models.ClassRoomDetail>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.SeatingCapacity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ResourceQuantity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ClassRoom.ClassRoomName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Resource.ResourceName)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.SeatingCapacity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ResourceQuantity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ClassRoom.ClassRoomName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Resource.ResourceName)
+        </td>
+        <td>
+           
+            @Html.ActionLink("Delete", "ConfirmDeleteClassroomDetails", new {  id=item.DetailsId  })
+        </td>
+    </tr>
+}
+
+</table>

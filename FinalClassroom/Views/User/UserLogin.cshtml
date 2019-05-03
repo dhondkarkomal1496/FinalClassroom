@@ -1,0 +1,166 @@
+﻿
+@{
+    ViewBag.Title = "UserLogin";
+}
+
+<h2>UserLogin</h2>
+@using System.Web.Script.Serialization
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+   #main
+   {
+       height:510px;
+   }
+
+
+
+   .dhx_cal_event.old_event div,
+   .dhx_cal_event_line.old_event,
+   .dhx_cal_event_clear.old_event,
+   .dhx_wa_ev_body.old_event
+   {
+        background-color: #B9B9B9 !important;
+   }
+
+
+
+    </style>
+    <script>
+        @*function attachRules() {
+            var rooms = @Html.Raw(new JavaScriptSerializer().Serialize(Model.Rooms));
+            //Add a helper that we’ll need later:
+            //returns room name by id
+            function getRoom(id) {
+                for (var i in rooms) {
+                    if (rooms[i].ClassRoomId == id)
+                        return getClassRoom[i].label;
+                }
+                return "";
+            }
+        }*@
+
+
+	var needLoginMessage = "You need to login first";
+
+	var pastEventMessage = "You can't add or edit events in the past";
+	var othersEventMessage = "You can't edit other's event;"
+
+
+	var isEditable = function(event_id){
+		if(!checkLoggedIn())
+			return false;
+		var event_obj = scheduler.getEvent(event_id);
+		if(!checkEventOwner(event_obj ))
+			return false;
+		if(!event_obj)
+			return false;
+		return checkValidDate(event_obj.start_date);
+	};
+
+
+	@*function checkEventOwner(event){
+		if(event.user_id && event.user_id != "@Model.CurrentID"){
+			dhtmlx.message(othersEventMessage);
+			return false;
+		}
+		return true;
+	}*@
+
+	function checkValidDate(date){
+		if(date.valueOf() < new Date().valueOf()){
+			dhtmlx.message(pastEventMessage);
+			return false;
+		}else{
+			return true;
+		}
+	}
+
+	function checkLoggedIn(){
+		@if(!this.Request.IsAuthenticated){
+			<text>
+				dhtmlx.message(needLoginMessage);
+				return false;
+			</text>
+		}else{
+			<text>
+				return true;
+			</text>
+		}
+	}
+
+	scheduler.attachEvent("onBeforeLightbox", isEditable);
+
+	scheduler.attachEvent("onClick", isEditable);
+	scheduler.attachEvent("onDblClick",isEditable);
+	scheduler.attachEvent("onBeforeEventChanged", function(event){
+		return isEditable(event.id);
+	});
+	scheduler.attachEvent("onBeforeDrag", function (event_id, mode, native_event_object){
+		if(event_id)
+			return isEditable(event_id);
+		checkLoggedIn();
+		var date = scheduler.getActionData(native_event_object).date;
+		return checkValidDate(date);
+	});
+
+	scheduler.attachEvent("onEmptyClick", function (date){
+		checkLoggedIn();
+		checkValidDate(date);
+	});
+
+
+	scheduler.config.limit_start = new Date();
+	setInterval(function(){
+		scheduler.config.limit_start = new Date();
+	}, 1000*60);
+
+
+	@if(this.Request.IsAuthenticated){
+		<text>
+		//just for a demo purposes
+		scheduler.attachEvent("onLimitViolation", function(){
+			dhtmlx.message(pastEventMessage);
+		});
+		</text>
+	}
+
+
+
+	scheduler.templates.event_class = function(start, end, event){
+		var className = "";
+		if(event.start_date.valueOf()  < new Date().valueOf()){
+			className = "old_event";
+		}else if(event.user_id){
+			className = "user_" + event.user_id;
+		}
+		return className;
+	};
+
+
+
+	scheduler.templates.event_text = scheduler.templates.agenda_text = scheduler.templates.event_bar_text = function(start,end,ev){
+		return getRoom(ev.room_id)+' : ' + ev.text;
+	}
+	scheduler.templates.week_agenda_event_text = function(start,end,ev){
+		return scheduler.templates.event_date(ev.start_date) + ' ' +getRoom(ev.room_id)+' : ' + ev.text;
+	}
+
+}
+
+
+    </script>
+    <style>
+        body {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <div style="height:700px;width:900px;margin:0 auto">
+        @Html.Raw(Model.Render())
+    </div>
+</body>
+</html>
